@@ -2,15 +2,15 @@
 
 set -e
 
-host="$1"
+db_url="$DATABASE_URL"
 shift
 cmd="$@"
 
-until PGPASSWORD=$(echo "$DATABASE_URL" | sed -e 's,^.*://[^:]*:\([^@]*\)@.*, \1,') \
-      PGUSER=$(echo "$DATABASE_URL" | sed -e 's,^.*://\([^:]*\):.*,\1,') \
-      PGHOST=$(echo "$DATABASE_URL" | sed -e 's,^.*://[^@]*@\(.*\):.*,\1,') \
-      PGPORT=$(echo "$DATABASE_URL" | sed -e 's,^.*:\([0-9]*\)/.*,\1,') \
-      PGDATABASE=$(echo "$DATABASE_URL" | sed -e 's,^.*/\([^?]*\).*,\1,') \
+until PGPASSWORD=$(echo "$db_url" | sed -e 's,^.*://[^:]*:\([^@]*\)@.*, \1,') \
+      PGUSER=$(echo "$db_url" | sed -e 's,^.*://\([^:]*\):.*,\1,') \
+      PGHOST=$(echo "$db_url" | sed -e 's,^.*://[^@]*@\(.*\):.*,\1,') \
+      PGPORT=$(echo "$db_url" | sed -e 's,^.*:\([0-9]*\)/.*,\1,') \
+      PGDATABASE=$(echo "$db_url" | sed -e 's,^.*/\([^?]*\).*,\1,') \
       psql -h "$PGHOST" -U "$PGUSER" -c '\q'; do
   >&2 echo "Postgres is unavailable - sleeping"
   sleep 1
