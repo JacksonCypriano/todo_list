@@ -1,32 +1,16 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:16
+  app:
+    build: .
+    depends_on:
+      - redis
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
-      POSTGRES_DB: ${POSTGRES_DB:-tasks}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
-    ports:
-      - "5432:5432"
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+    entrypoint: ["./wait-for-postgres.sh", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
   redis:
     image: redis:7.2.5
     ports:
       - "6379:6379"
-
-  app:
-    build: .
-    depends_on:
-      - db
-      - redis
-    env_file:
-      - .env
-    entrypoint: ["./wait-for-postgres.sh", "db", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-volumes:
-  postgres_data:
