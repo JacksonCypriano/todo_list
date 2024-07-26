@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-list-app
+  namespace: todo-list
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-list-app
+  template:
+    metadata:
+      labels:
+        app: todo-list-app
+    spec:
+      containers:
+      - name: todo-list-app
+        image: todo_list_microservice-app:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: DATABASE_URL
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: REDIS_URL
