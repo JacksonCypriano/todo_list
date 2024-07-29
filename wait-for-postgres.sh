@@ -6,14 +6,15 @@ db_url="$DATABASE_URL"
 shift
 cmd="$@"
 
-# Adiciona um atraso antes de tentar se conectar ao PostgreSQL
-sleep 3
+PGPASSWORD=$(echo "$db_url" | sed -e 's,^.*://[^:]*:\([^@]*\)@.*, \1,')
+PGUSER=$(echo "$db_url" | sed -e 's,^.*://\([^:]*\):.*,\1,')
+PGHOST=$(echo "$db_url" | sed -e 's,^.*://[^@]*@\(.*\):.*,\1,')
+PGPORT=$(echo "$db_url" | sed -e 's,^.*:\([0-9]*\)/.*,\1,')
+PGDATABASE=$(echo "$db_url" | sed -e 's,^.*/\([^?]*\).*,\1,')
 
-until PGPASSWORD=$(echo "$db_url" | sed -e 's,^.*://[^:]*:\([^@]*\)@.*, \1,') \
-      PGUSER=$(echo "$db_url" | sed -e 's,^.*://\([^:]*\):.*,\1,') \
-      PGHOST=$(echo "$db_url" | sed -e 's,^.*://[^@]*@\(.*\):.*,\1,') \
-      PGPORT=$(echo "$db_url" | sed -e 's,^.*:\([0-9]*\)/.*,\1,') \
-      PGDATABASE=$(echo "$db_url" | sed -e 's,^.*/\([^?]*\).*,\1,') \
+echo "Trying to connect to PGHOST=$PGHOST, PGPORT=$PGPORT, PGUSER=$PGUSER, PGDATABASE=$PGDATABASE"
+
+until PGPASSWORD=$PGPASSWORD \
       psql -h "$PGHOST" -U "$PGUSER" -c '\q'; do
   >&2 echo "Postgres is unavailable - sleeping"
   sleep 1
