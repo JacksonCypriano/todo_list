@@ -3,14 +3,13 @@
 set -e
 
 db_url="$DATABASE_URL"
-shift
 cmd="$@"
 
-PGPASSWORD=$(echo "$db_url" | sed -e 's,^.*://[^:]*:\([^@]*\)@.*, \1,')
-PGUSER=$(echo "$db_url" | sed -e 's,^.*://\([^:]*\):.*,\1,')
-PGHOST=$(echo "$db_url" | sed -e 's,^.*://[^@]*@\([^:]*\):[0-9]*/.*,\1,')
-PGPORT=$(echo "$db_url" | sed -e 's,^.*://[^@]*@\([^:]*\):\([0-9]*\)/.*,\2,')
-PGDATABASE=$(echo "$db_url" | sed -e 's,^.*/\([^?]*\).*,\1,')
+PGPASSWORD=$(echo "$db_url" | sed -e 's,^.*://[^:]*:\([^@]*\)@.*, \1,' | xargs)
+PGUSER=$(echo "$db_url" | sed -e 's,^.*://\([^:]*\):.*,\1,' | xargs)
+PGHOST=$(echo "$db_url" | sed -e 's,^.*://[^@]*@\([^:]*\):[0-9]*/.*,\1,' | xargs)
+PGPORT=$(echo "$db_url" | sed -e 's,^.*://[^@]*@\([^:]*\):\([0-9]*\)/.*,\2,' | xargs)
+PGDATABASE=$(echo "$db_url" | sed -e 's,^.*/\([^?]*\).*,\1,' | xargs)
 
 # Adicionando prints para debug
 echo "Extracted connection details:"
@@ -27,4 +26,4 @@ until PGPASSWORD=$PGPASSWORD \
 done
 
 >&2 echo "Postgres is up - executing command"
-exec $cmd
+exec uvicorn app.main:app --host 0.0.0.0 --port 8000
