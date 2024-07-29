@@ -15,7 +15,7 @@ PGDATABASE=$(echo "$db_url" | sed -e 's,^.*/\([^?]*\).*,\1,')
 echo "Trying to connect to PGHOST=$PGHOST, PGPORT=$PGPORT, PGUSER=$PGUSER, PGDATABASE=$PGDATABASE"
 
 until PGPASSWORD=$PGPASSWORD \
-      psql -h "$PGHOST" -U "$PGUSER" -p "$PGPORT" -c '\q'; do
+      psql -h "$PGHOST" -U "$PGUSER" -p "$PGPORT" -d "$PGDATABASE" -c '\q'; do
   >&2 echo "Postgres is unavailable - sleeping"
   sleep 1
 done
